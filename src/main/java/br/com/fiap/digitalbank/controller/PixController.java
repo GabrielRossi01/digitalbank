@@ -10,24 +10,25 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.fiap.digitalbank.model.Account;
-import br.com.fiap.digitalbank.service.DepositService;
+import br.com.fiap.digitalbank.service.PixService;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@RequestMapping("deposits")
+@RequestMapping("pix")
 @Slf4j
-public class DepositController {
+public class PixController {
 
-    public record DepositRequest(Long accountId, BigDecimal amount) {
+    public record PixRequest(Long originAccountId, Long destinationAccountId, BigDecimal amount) {
     }
 
     @Autowired
-    private DepositService depositService;
+    private PixService pixService;
 
     @PostMapping
-    public ResponseEntity<Account> deposit(@RequestBody DepositRequest request) {
-        Account updatedAccount = depositService.deposit(request.accountId(), request.amount().doubleValue());
-        log.info("Depósito realizado com sucesso para a conta {}", request.accountId());
+    public ResponseEntity<Account> transferPix(@RequestBody PixRequest request) {
+        Account updatedAccount = pixService.transfer(request.originAccountId(), request.destinationAccountId(),
+                request.amount());
+        log.info("PIX realizado com sucesso da conta {}", request.originAccountId());
         return ResponseEntity.ok(updatedAccount);
     }
 }

@@ -13,9 +13,11 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.fiap.digitalbank.model.Account;
 import br.com.fiap.digitalbank.service.WithdrawalService;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("withdrawals")
+@Slf4j
 public class WithdrawalController {
 
     public record WithdrawalRequest(Long accountId, BigDecimal amount) {}
@@ -27,6 +29,7 @@ public class WithdrawalController {
     public ResponseEntity<?> withdraw(@RequestBody WithdrawalRequest request) {
         try {
             Account updatedAccount = withdrawalService.withdraw(request.accountId(), request.amount());
+            log.info("Saque realizado com sucesso para a conta {}", request.accountId());
             return ResponseEntity.ok(updatedAccount);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
