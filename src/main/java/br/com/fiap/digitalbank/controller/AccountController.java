@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("accounts")
 @Slf4j
 public class AccountController {
-    
+
     @Autowired
     private AccountRepository accountRepository;
 
@@ -47,19 +49,24 @@ public class AccountController {
     }
 
     @DeleteMapping("{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void destroy(@PathVariable Long id) {
-        log.info("Excluindo conta com id " + id);
-        Account account = getAccountById(id);
+    @Transactional
+    public ResponseEntity<Void> destroy(@PathVariable Long id) {
+        log.info("Encerrando conta com id " + id);
+        Account account = accountRepository
+                .findById(id)
+                .orElse(null);
+        if (account == null) {
+            return ResponseEntity.notFound().build();
+        }
         account.setStatus(AccountStatusType.INACTIVE);
         accountRepository.save(account);
+        return ResponseEntity.noContent().build();
     }
 
     private Account getAccountById(Long id) {
         return accountRepository
                 .findById(id)
                 .orElseThrow(
-                    () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Conta não encontrada com id " + id)
-                );
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Conta não encontrada com id " + id));
     }
 }

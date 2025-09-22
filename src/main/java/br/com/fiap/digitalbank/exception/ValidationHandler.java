@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class ValidationHandler {
-    
+
     record ValidationError(String field, String message) {
         public ValidationError(FieldError fieldError) {
             this(fieldError.getField(), fieldError.getDefaultMessage());
